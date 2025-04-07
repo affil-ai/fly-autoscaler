@@ -208,6 +208,11 @@ func NewConfigFromEnv() (_ *Config, err error) {
 			keyData = os.Getenv("FAS_TEMPORAL_KEY_DATA")
 		}
 
+		apiKey := os.Getenv("TEMPORAL_API_KEY")
+		if apiKey == "" {
+			apiKey = os.Getenv("FAS_TEMPORAL_API_KEY")
+		}
+
 		c.MetricCollectors = append(c.MetricCollectors, &MetricCollectorConfig{
 			Type:       "temporal",
 			Address:    addr,
@@ -215,6 +220,7 @@ func NewConfigFromEnv() (_ *Config, err error) {
 			MetricName: os.Getenv("FAS_TEMPORAL_METRIC_NAME"),
 			CertData:   certData,
 			KeyData:    keyData,
+			APIKey:     apiKey,
 			Query:      os.Getenv("FAS_TEMPORAL_QUERY"),
 		})
 	}
