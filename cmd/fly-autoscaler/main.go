@@ -390,6 +390,7 @@ type MetricCollectorConfig struct {
 	Namespace string `yaml:"namespace"`
 	CertData  string `yaml:"cert-data"`
 	KeyData   string `yaml:"key-data"`
+	APIKey    string `yaml:"api-key"`
 }
 
 func (c *MetricCollectorConfig) Validate() error {
@@ -450,6 +451,7 @@ func (c *MetricCollectorConfig) newTemporalMetricCollector() (*temporal.MetricCo
 	collector.Namespace = c.Namespace
 	collector.Cert = []byte(c.CertData)
 	collector.Key = []byte(c.KeyData)
+	collector.APIKey = c.APIKey
 	collector.Query = c.Query
 
 	if err := collector.Open(); err != nil {
