@@ -84,13 +84,20 @@ func (r *Reconciler) CollectMetrics(ctx context.Context) error {
 	// Clear all metrics before each collection as the reconciler can be shared.
 	r.metrics = make(map[string]float64)
 
+	slog.Debug("collecting metrics", slog.Int("collectors", len(r.Collectors)))
+
 	for _, c := range r.Collectors {
 		value, err := c.CollectMetric(ctx, r.AppName)
 		if err != nil {
 			return fmt.Errorf("collect metric (%q): %w", c.Name(), err)
 		}
 		r.SetValue(c.Name(), value)
+		slog.Debug("collected metric", slog.String("name", c.Name()), slog.Float64("value", value))
 	}
+
+	// Log summary of all collected metrics for autoscaling
+	slog.Info("metrics collected for autoscaling", slog.Any("metrics", r.metrics))
+
 	return nil
 }
 
@@ -460,7 +467,17 @@ func (r *Reconciler) evalInt(s string) (int, bool, error) {
 	if f < 0 {
 		return 0, true, nil
 	}
-	return int(f), true, nil
+
+	finalResult := int(f)
+
+	// Log the expression evaluation result for autoscaling decisions
+	slog.Info("expression evaluated for autoscaling", 
+		slog.String("expression", s),
+		slog.Any("raw_result", v),
+		slog.Int("final_result", finalResult),
+		slog.Any("metrics_env", env))
+
+	return finalResult, true, nil
 }
 
 func machinesByState(a []*fly.Machine) map[string][]*fly.Machine {
